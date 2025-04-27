@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบเช็คชื่อ V.2</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="login-container" id="login-section">
+  <h1>เข้าสู่ระบบเช็คชื่อ</h1>
+  <input type="text" id="username" placeholder="รหัสนักเรียน / รหัสครู">
+  <input type="password" id="password" placeholder="รหัสผ่าน">
+  <button onclick="login()">เข้าสู่ระบบ</button>
+</div>
+
+<div class="dashboard-container" id="dashboard-student" style="display:none;">
+  <h1>สวัสดี นักเรียน</h1>
+  <div id="student-alert"></div>
+  <button onclick="checkInQR()">สแกน QR เช็คชื่อ</button>
+  <button onclick="manualCheckIn()">เช็คชื่อด้วยปุ่ม</button>
+  <button onclick="viewHistory()">ดูประวัติย้อนหลัง</button>
+  <button onclick="logout()">ออกจากระบบ</button>
+  <div id="student-history" style="margin-top: 20px;"></div>
+</div>
+
+<div class="dashboard-container" id="dashboard-teacher" style="display:none;">
+  <h1>สวัสดี ครู</h1>
+  <button onclick="viewStudentList()">ดูรายชื่อนักเรียน</button>
+  <button onclick="viewHistory()">ดูประวัติย้อนหลัง</button>
+  <button onclick="logout()">ออกจากระบบ</button>
+  <div id="teacher-student-list" style="margin-top: 20px;"></div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

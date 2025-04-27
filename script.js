@@ -1,0 +1,139 @@
+// script.js - ระบบเช็คชื่อ V.2 (เชื่อม Google Sheets จริง)
+
+const users = {
+  '66001': { password: '1234', role: 'student' },
+  'teacher01': { password: 'admin123', role: 'teacher' }
+};
+
+let attendanceHistory = [];
+
+const webhookURL = 'https://script.google.com/macros/s/AKfycbzAoUIHjd4r5xdynOL44__nggFXdClM6AIKo4EbdVC9Eq__bU1lUKu6lDk2e5F8gniJ/exec';
+
+function login() {
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value.trim();
+  
+  if (users[username] && users[username].password === password) {
+    localStorage.setItem('user', JSON.stringify({ username, role: users[username].role }));
+    if (users[username].role === 'student') {
+      showStudentDashboard();
+    } else {
+      showTeacherDashboard();
+    }
+  } else {
+    alert('รหัสผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
+  }
+}
+
+function logout() {
+  localStorage.removeItem('user');
+  location.reload();
+}
+
+function showStudentDashboard() {
+  document.getElementById('login-section').style.display = 'none';
+  document.getElementById('dashboard-student').style.display = 'block';
+  checkTodayAttendance();
+}
+
+function showTeacherDashboard() {
+  document.getElementById('login-section').style.display = 'none';
+  document.getElementById('dashboard-teacher').style.display = 'block';
+}
+
+function checkTodayAttendance() {
+  const today = new Date().toISOString().split('T')[0];
+  const user = JSON.parse(localStorage.getItem('user'));
+  const checked = attendanceHistory.find(record => record.username === user.username && record.date === today);
+  
+  if (checked) {
+    document.getElementById('student-alert').innerHTML = '✅ วันนี้คุณได้เช็คชื่อแล้ว!';
+  } else {
+    document.getElementById('student-alert').innerHTML = '⚠️ วันนี้คุณยังไม่ได้เช็คชื่อ!';
+  }
+}
+
+function checkInQR() {
+  manualCheckIn();
+}
+
+function manualCheckIn() {
+  const today = new Date().toISOString().split('T')[0];
+  const user = JSON.parse(localStorage.getItem('user'));
+
+  const alreadyChecked = attendanceHistory.find(record => record.username === user.username && record.date === today);
+
+  if (!alreadyChecked) {
+    attendanceHistory.push({ username: user.username, date: today });
+    sendToSheet(user.username, today);
+    alert('เช็คชื่อสำเร็จ!');
+  } else {
+    alert('คุณได้เช็คชื่อแล้ววันนี้');
+  }
+
+  checkTodayAttendance();
+}
+
+function sendToSheet(username, today) {
+  const data = {
+    date: today,
+    studentId: username,
+    name: username, // ในอนาคตสามารถใส่ชื่อจริงได้
+    status: 'มาเรียน'
+  };
+
+  fetch(webhookURL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+}
+
+function viewHistory() {
+  const historyDiv = document.getElementById('student-history') || document.getElementById('teacher-student-list');
+  historyDiv.innerHTML = '<h3>ประวัติการเช็คชื่อ</h3>';
+  
+  const today = new Date();
+  let historyHTML = '<ul>';
+  
+  for (let i = 0; i < 7; i++) {
+    const date = new Date(today);
+    date.setDate(today.getDate() - i);
+    const dateString = date.toISOString().split('T')[0];
+    
+    const user = JSON.parse(localStorage.getItem('user'));
+    const record = attendanceHistory.find(r => r.username === user.username && r.date === dateString);
+    
+    historyHTML += `<li>${dateString}: ${record ? '✅ มาเรียน' : '❌ ขาด'}</li>`;
+  }
+  
+  historyHTML += '</ul>';
+  historyDiv.innerHTML += historyHTML;
+}
+
+function viewStudentList() {
+  const studentListDiv = document.getElementById('teacher-student-list');
+  studentListDiv.innerHTML = '<h3>รายชื่อนักเรียน</h3><ul>';
+  
+  for (let username in users) {
+    if (users[username].role === 'student') {
+      const today = new Date().toISOString().split('T')[0];
+      const record = attendanceHistory.find(r => r.username === username && r.date === today);
+      studentListDiv.innerHTML += `<li>${username} : ${record ? '✅ มาเรียน' : '❌ ยังไม่มา'}</li>`;
+    }
+  }
+  
+  studentListDiv.innerHTML += '</ul>';
+}
+
+window.onload = () => {
+  const user = JSON.parse(localStorage.getItem('user'));
+  if (user) {
+    if (user.role === 'student') {
+      showStudentDashboard();
+    } else {
+      showTeacherDashboard();
+    }
+  }
+};
