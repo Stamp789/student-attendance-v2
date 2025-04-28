@@ -3,36 +3,42 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ระบบเช็คชื่อ V.2</title>
+  <title>ระบบเช็คชื่อโรงเรียนชุมชนบ้านหนองผึ้ง (ประพันธ์คุรุราษฎร์อุทิศ)</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="login-container" id="login-section">
-  <h1>เข้าสู่ระบบเช็คชื่อ</h1>
+<h1>ระบบเช็คชื่อโรงเรียนชุมชนบ้านหนองผึ้ง (ประพันธ์คุรุราษฎร์อุทิศ)</h1>
+
+<!-- Login Section -->
+<div id="login-section">
+  <h2>เข้าสู่ระบบ</h2>
   <input type="text" id="username" placeholder="รหัสนักเรียน / รหัสครู">
   <input type="password" id="password" placeholder="รหัสผ่าน">
   <button onclick="login()">เข้าสู่ระบบ</button>
 </div>
 
-<div class="dashboard-container" id="dashboard-student" style="display:none;">
-  <h1>สวัสดี นักเรียน</h1>
+<!-- Dashboard for Students -->
+<div id="dashboard-student" style="display:none;">
+  <h2>ยินดีต้อนรับ นักเรียน</h2>
+  <button onclick="checkIn()">เช็คชื่อ</button>
   <div id="student-alert"></div>
-  <button onclick="checkInQR()">สแกน QR เช็คชื่อ</button>
-  <button onclick="manualCheckIn()">เช็คชื่อด้วยปุ่ม</button>
   <button onclick="viewHistory()">ดูประวัติย้อนหลัง</button>
   <button onclick="logout()">ออกจากระบบ</button>
-  <div id="student-history" style="margin-top: 20px;"></div>
 </div>
 
-<div class="dashboard-container" id="dashboard-teacher" style="display:none;">
-  <h1>สวัสดี ครู</h1>
+<!-- Dashboard for Teachers -->
+<div id="dashboard-teacher" style="display:none;">
+  <h2>ยินดีต้อนรับ ครู</h2>
   <button onclick="viewStudentList()">ดูรายชื่อนักเรียน</button>
-  <button onclick="viewHistory()">ดูประวัติย้อนหลัง</button>
+  <button onclick="downloadPDF()">ดาวน์โหลดรายงานเป็น PDF</button>
   <button onclick="logout()">ออกจากระบบ</button>
-  <div id="teacher-student-list" style="margin-top: 20px;"></div>
+  <div id="teacher-student-list"></div>
+  <canvas id="attendanceChart" width="400" height="400"></canvas>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="script.js"></script>
+
 </body>
 </html>
