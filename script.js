@@ -1,8 +1,6 @@
-// script.js - ระบบเช็คชื่อ V.2 (เชื่อม Google Sheets จริง)
-
 const users = {
-  '66001': { password: '1234', role: 'student' },
-  'teacher01': { password: 'admin123', role: 'teacher' }
+  '66001': { password: '1234', role: 'student', name: 'มานี กล้าหาญ' },
+  'teacher01': { password: 'admin123', role: 'teacher', name: 'ครูสมศรี' }
 };
 
 let attendanceHistory = [];
@@ -39,6 +37,7 @@ function showStudentDashboard() {
 function showTeacherDashboard() {
   document.getElementById('login-section').style.display = 'none';
   document.getElementById('dashboard-teacher').style.display = 'block';
+  renderChart();
 }
 
 function checkTodayAttendance() {
@@ -53,16 +52,12 @@ function checkTodayAttendance() {
   }
 }
 
-function checkInQR() {
-  manualCheckIn();
-}
-
-function manualCheckIn() {
+function checkIn() {
   const today = new Date().toISOString().split('T')[0];
   const user = JSON.parse(localStorage.getItem('user'));
-
+  
   const alreadyChecked = attendanceHistory.find(record => record.username === user.username && record.date === today);
-
+  
   if (!alreadyChecked) {
     attendanceHistory.push({ username: user.username, date: today });
     sendToSheet(user.username, today);
@@ -70,7 +65,7 @@ function manualCheckIn() {
   } else {
     alert('คุณได้เช็คชื่อแล้ววันนี้');
   }
-
+  
   checkTodayAttendance();
 }
 
@@ -78,7 +73,7 @@ function sendToSheet(username, today) {
   const data = {
     date: today,
     studentId: username,
-    name: username, // ในอนาคตสามารถใส่ชื่อจริงได้
+    name: users[username].name,
     status: 'มาเรียน'
   };
 
@@ -125,6 +120,34 @@ function viewStudentList() {
   }
   
   studentListDiv.innerHTML += '</ul>';
+}
+
+function downloadPDF() {
+  const doc = new jsPDF();
+  doc.text("รายงานการเช็คชื่อ", 10, 10);
+  doc.text("ชั้นเรียน: ป.3/1", 10, 20);
+  doc.text("นักเรียน: มานี กล้าหาญ", 10, 30);
+  doc.text("สถานะ: มาเรียน", 10, 40);
+  
+  doc.save('attendance-report.pdf');
+}
+
+function renderChart() {
+  const ctx = document.getElementById('attendanceChart').getContext('2d');
+  const chart = new Chart(ctx, {
+    type: 'pie',
+    data: {
+      labels: ['มาเรียน', 'ขาดเรียน', 'ลา', 'สาย'],
+      datasets: [{
+        label: 'สรุปการมาเรียน',
+        data: [80, 10, 5, 5],  // This would be dynamic based on real data
+        backgroundColor: ['#28a745', '#dc3545', '#ffc107', '#007bff'],
+      }]
+    },
+    options: {
+      responsive: true
+    }
+  });
 }
 
 window.onload = () => {
